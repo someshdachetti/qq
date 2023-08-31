@@ -1,26 +1,3 @@
-###
-
-POST http://localhost:3000/users/
-Content-Type: application/json
-
-{   
-    "name":"rahul",
-    "username":"rahul123",
-    "password": "rahul@456",
-    "gender": "Male",
-    "location":"hyderabad"
-}
-
-
-###
-
-POST http://localhost:3000/login/
-Content-Type: application/json
-
-{
-    "username":"rahul123",
-    "password": "rahul@456"
-}
 
 //login user 
 ###
@@ -29,7 +6,7 @@ POST  http://localhost:3000/users/
 Content-Type: application/json
 
 {
-    "username" : "somesh12",
+    "username" : "somesh124",
     "name" : "somesh",
     "password" : "somesh@123",
     "gender" : "male",
@@ -44,3 +21,4 @@ Content-Type: application/json
     "username" :"somesh12",
     "password" :"somesh@123"
 }
+

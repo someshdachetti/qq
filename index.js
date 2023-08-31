@@ -27,19 +27,6 @@ const initializeDBAndServer = async () => {
 };
 initializeDBAndServer();
 
-// Get Books API
-app.get("/books/", async (request, response) => {
-  const getBooksQuery = `
-  SELECT
-    *
-  FROM
-    book
-  ORDER BY
-    book_id;`;
-  const booksArray = await db.all(getBooksQuery);
-  response.send(booksArray);
-});
-
 //login user
 
 app.post("/users/", async (request, response) => {
@@ -55,7 +42,7 @@ app.post("/users/", async (request, response) => {
     //creating new user
     const creatingNewUser = `
         INSERT INTO 
-        user (username,name,gender,location)
+        user (username,name,password,gender,location)
         values (
             '${username}',
             '${name}',
@@ -63,9 +50,15 @@ app.post("/users/", async (request, response) => {
             '${gender}',
             '${location}'
         );`;
+    try {
+      await db.run(creatingNewUser);
+      response.send("user successfully created");
+    } catch (error) {
+      console.error("error", error);
+      response.send("intenal error").status(500);
+    }
   } else {
-    response.status(400);
-    response.send("user Already Exist");
+    response.send("user already exist").status(400);
   }
 });
 
@@ -74,21 +67,31 @@ app.post("/users/", async (request, response) => {
 app.post("/login/", async (request, response) => {
   const { username, password } = request.body;
 
+  const selectUserQuery = `select * from user where username = '${username}'`;
   const dbUser = await db.get(selectUserQuery);
 
   if (dbUser === undefined) {
-    response.send(400);
+    response.status(400);
   } else {
-    const verifyPassword = await bcrypt.compare(password, dbUser.password);
-    if (verifyPassword === true) {
-      const payload = { username: username };
+    try {
+      const verifyPassword = await bcrypt.compare(password, dbUser.password);
 
-      const jtoken = jwt.sing(payload, "websiteLearn");
+      if (verifyPassword) {
+        const payLoad = { username: username };
 
-      response.send({ jtoken });
-    } else {
-      response.status(400);
-      response.send("Invalid User");
+        console.log("payLoad", payLoad);
+
+        const jtoken = await jwt.sign(payLoad, "websiteLearn");
+
+        console.log("jtwt Token", jtoken);
+
+        response.send({ jtoken });
+      } else {
+        response.send("Invalid user").status(400);
+      }
+    } catch (error) {
+      console.error(("error occur", error));
+      response.status(500).send("internal Error");
     }
   }
 });
